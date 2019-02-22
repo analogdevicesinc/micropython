@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2019 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
-#define MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
 
-#include "py/mphal.h"
-#include "genhdr/pins.h"
-#include "genhdr/pins_af_defs.h"
+#define _FFCONF 68020
 
-#if 0 // Enable to test if AF's are statically compiled
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); \
-        _Static_assert(fn_type(pin_obj) != -1, ""); \
-        _Static_assert(__builtin_constant_p(fn_type(pin_obj)) == 1, "")
+#define _FS_READONLY    1
+#define _FS_MINIMIZE    0
+#define _USE_STRFUNC    0
 
-#else
+#define _USE_FIND       0
+#define _USE_MKFS       0
+#define _USE_FASTSEEK   0
+#define _USE_EXPAND     0
+#define _USE_CHMOD      0
+#define _USE_LABEL      0
+#define _USE_FORWARD    0
 
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)) /* Overflow Error => alt func not found */
+#define _CODE_PAGE      437
+#define _USE_LFN        1
+#define _MAX_LFN        255
+#define _LFN_UNICODE    0
+#define _STRF_ENCODE    3
+#define _FS_RPATH       0
 
-#define mp_hal_pin_config_alt_static_speed(pin_obj, mode, pull, speed, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); /* Overflow Error => alt func not found */ \
-        mp_hal_pin_config_speed(pin_obj, speed)
+#define _VOLUMES        1
+#define _STR_VOLUME_ID  0
+#define _MULTI_PARTITION 0
+#define _MIN_SS         512
+#define _MAX_SS         512
+#define _USE_TRIM       0
+#define _FS_NOFSINFO    0
 
-#endif
-
-#endif // MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
+#define _FS_TINY        1
+#define _FS_EXFAT       0
+#define _FS_NORTC       1
+#define _NORTC_MON      1
+#define _NORTC_MDAY     1
+#define _NORTC_YEAR     2019
+#define _FS_LOCK        0
+#define _FS_REENTRANT   0

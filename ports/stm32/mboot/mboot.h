@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2019 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
-#define MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
 
-#include "py/mphal.h"
-#include "genhdr/pins.h"
-#include "genhdr/pins_af_defs.h"
+#include <stdint.h>
+#include <stddef.h>
 
-#if 0 // Enable to test if AF's are statically compiled
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); \
-        _Static_assert(fn_type(pin_obj) != -1, ""); \
-        _Static_assert(__builtin_constant_p(fn_type(pin_obj)) == 1, "")
+// Use this to tag global static data in RAM that doesn't need to be zeroed on startup
+#define SECTION_NOZERO_BSS __attribute__((section(".nozero_bss")))
 
-#else
+#define ELEM_DATA_START (&_estack)
+#define ELEM_DATA_MAX (ELEM_DATA_START + 1024)
 
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)) /* Overflow Error => alt func not found */
+enum {
+    ELEM_TYPE_END = 1,
+    ELEM_TYPE_MOUNT,
+    ELEM_TYPE_FSLOAD,
+};
 
-#define mp_hal_pin_config_alt_static_speed(pin_obj, mode, pull, speed, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); /* Overflow Error => alt func not found */ \
-        mp_hal_pin_config_speed(pin_obj, speed)
+enum {
+    ELEM_MOUNT_FAT = 1,
+};
 
-#endif
+typedef struct _fsload_bdev_t {
+    uint32_t base_addr;
+    uint32_t byte_len;
+} fsload_bdev_t;
 
-#endif // MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
+extern uint8_t _estack;
+
+uint32_t get_le32(const uint8_t *b);
+void led_state_all(unsigned int mask);
+
+int do_page_erase(uint32_t addr, uint32_t *next_addr);
+void do_read(uint32_t addr, int len, uint8_t *buf);
+int do_write(uint32_t addr, const uint8_t *src8, size_t len);
+
+const uint8_t *elem_search(const uint8_t *elem, uint8_t elem_id);
+int fsload_process(void);

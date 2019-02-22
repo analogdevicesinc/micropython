@@ -3,7 +3,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2019 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
-#define MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
 
 #include "py/mphal.h"
-#include "genhdr/pins.h"
-#include "genhdr/pins_af_defs.h"
+#include "lib/oofatfs/ff.h"
+#include "lib/oofatfs/diskio.h"
+#include "mboot.h"
 
-#if 0 // Enable to test if AF's are statically compiled
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); \
-        _Static_assert(fn_type(pin_obj) != -1, ""); \
-        _Static_assert(__builtin_constant_p(fn_type(pin_obj)) == 1, "")
+#if MBOOT_FSLOAD
 
+#if _MAX_SS == _MIN_SS
+#define SECSIZE (_MIN_SS)
 #else
-
-#define mp_hal_pin_config_alt_static(pin_obj, mode, pull, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)) /* Overflow Error => alt func not found */
-
-#define mp_hal_pin_config_alt_static_speed(pin_obj, mode, pull, speed, fn_type) \
-        mp_hal_pin_config(pin_obj, mode, pull, fn_type(pin_obj)); /* Overflow Error => alt func not found */ \
-        mp_hal_pin_config_speed(pin_obj, speed)
-
+#error Unsupported
 #endif
 
-#endif // MICROPY_INCLUDED_STM32_PIN_STATIC_AF_H
+DRESULT disk_read(void *pdrv, BYTE *buf, DWORD sector, UINT count) {
+    fsload_bdev_t *bdev = pdrv;
+
+    if (0 <= sector && sector < bdev->byte_len / 512) {
+        do_read(bdev->base_addr + sector * SECSIZE, count * SECSIZE, buf);
+        return RES_OK;
+    }
+
+    return RES_PARERR;
+}
+
+DRESULT disk_ioctl(void *pdrv, BYTE cmd, void *buf) {
+    fsload_bdev_t *bdev = pdrv;
+
+    switch (cmd) {
+        case CTRL_SYNC:
+            return RES_OK;
+
+        case GET_SECTOR_COUNT:
+            *((DWORD*)buf) = bdev->byte_len / SECSIZE;
+            return RES_OK;
+
+        case GET_SECTOR_SIZE:
+            *((WORD*)buf) = SECSIZE;
+            return RES_OK;
+
+        case GET_BLOCK_SIZE:
+            *((DWORD*)buf) = 1; // erase block size in units of sector size
+            return RES_OK;
+
+        case IOCTL_INIT:
+        case IOCTL_STATUS:
+            *((DSTATUS*)buf) = STA_PROTECT;
+            return RES_OK;
+
+        default:
+            return RES_PARERR;
+    }
+}
+
+#endif // MBOOT_FSLOAD
