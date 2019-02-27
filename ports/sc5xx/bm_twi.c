@@ -298,6 +298,14 @@ BM_TWI_RESULT twi_write_block_r(BM_TWI *device,
             }
         }
 
+        // Check if any error happend
+        if ((*device->pREG_TWI_MSTRSTAT) & BITM_TWI_MSTRSTAT_ANAK) {
+            // Clear the error bit
+            (*device->pREG_TWI_MSTRSTAT) |= BITM_TWI_MSTRSTAT_ANAK;
+            (*device->pREG_TWI_ISTAT) |= BITM_TWI_ISTAT_MCOMP;
+            return TWI_SIMPLE_TIMEOUT;
+        }
+
         // Clear completion status bit
         (*device->pREG_TWI_ISTAT) |= BITM_TWI_ISTAT_MCOMP;
 
