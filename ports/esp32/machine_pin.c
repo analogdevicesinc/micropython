@@ -39,6 +39,9 @@
 #include "machine_rtc.h"
 #include "modesp32.h"
 
+// Used to implement gpio_hold_en() functionality; value should be distinct from all IDF pull modes
+#define GPIO_PULLHOLD (8)
+
 typedef struct _machine_pin_obj_t {
     mp_obj_base_t base;
     gpio_num_t id;
@@ -137,7 +140,7 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     enum { ARG_mode, ARG_pull, ARG_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_mode, MP_ARG_OBJ, {.u_obj = mp_const_none}},
-        { MP_QSTR_pull, MP_ARG_OBJ, {.u_obj = mp_const_none}},
+        { MP_QSTR_pull, MP_ARG_OBJ, {.u_obj = MP_OBJ_NEW_SMALL_INT(-1)}},
         { MP_QSTR_value, MP_ARG_KW_ONLY | MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
     };
 
@@ -164,8 +167,20 @@ STATIC mp_obj_t machine_pin_obj_init_helper(const machine_pin_obj_t *self, size_
     }
 
     // configure pull
-    if (args[ARG_pull].u_obj != mp_const_none) {
-        gpio_set_pull_mode(self->id, mp_obj_get_int(args[ARG_pull].u_obj));
+    if (args[ARG_pull].u_obj != MP_OBJ_NEW_SMALL_INT(-1)) {
+        if (args[ARG_pull].u_obj == mp_const_none) {
+            gpio_set_pull_mode(self->id, GPIO_FLOATING);
+        } else {
+            int mode = mp_obj_get_int(args[ARG_pull].u_obj);
+            if (mode == GPIO_PULLHOLD) {
+                gpio_hold_en(self->id);
+            } else {
+                if (GPIO_IS_VALID_OUTPUT_GPIO(self->id)) {
+                    gpio_hold_dis(self->id);
+                }
+                gpio_set_pull_mode(self->id, mode);
+            }
+        }
     }
 
     return mp_const_none;
@@ -316,6 +331,7 @@ STATIC const mp_rom_map_elem_t machine_pin_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_OPEN_DRAIN), MP_ROM_INT(GPIO_MODE_INPUT_OUTPUT_OD) },
     { MP_ROM_QSTR(MP_QSTR_PULL_UP), MP_ROM_INT(GPIO_PULLUP_ONLY) },
     { MP_ROM_QSTR(MP_QSTR_PULL_DOWN), MP_ROM_INT(GPIO_PULLDOWN_ONLY) },
+    { MP_ROM_QSTR(MP_QSTR_PULL_HOLD), MP_ROM_INT(GPIO_PULLHOLD) },
     { MP_ROM_QSTR(MP_QSTR_IRQ_RISING), MP_ROM_INT(GPIO_PIN_INTR_POSEDGE) },
     { MP_ROM_QSTR(MP_QSTR_IRQ_FALLING), MP_ROM_INT(GPIO_PIN_INTR_NEGEDGE) },
     { MP_ROM_QSTR(MP_QSTR_WAKE_LOW), MP_ROM_INT(GPIO_PIN_INTR_LOLEVEL) },

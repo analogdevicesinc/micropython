@@ -8,6 +8,10 @@ BUILD ?= build-$(BOARD)
 # Allow the directory containing the board configuration to be specified
 BOARD_DIR ?= $(abspath ../boards/$(BOARD))
 
+# Set USE_MBOOT to 1 so that TEXT0_ADDR gets set properly for those boards
+# that can be built with or without mboot.
+USE_MBOOT ?= 1
+
 # Sanity check that the board configuration directory exists
 ifeq ($(wildcard $(BOARD_DIR)/.),)
 $(error Invalid BOARD specified: $(BOARD_DIR))
@@ -74,7 +78,7 @@ endif
 SRC_LIB = \
 	lib/libc/string0.c \
 	lib/oofatfs/ff.c \
-	lib/oofatfs/option/unicode.c \
+	lib/oofatfs/ffunicode.c \
 	extmod/uzlib/crc32.c \
 	extmod/uzlib/adler32.c \
 	extmod/uzlib/tinflate.c \

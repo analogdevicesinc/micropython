@@ -356,6 +356,11 @@
 #define MICROPY_COMP_CONST_FOLDING (1)
 #endif
 
+// Whether to enable optimisations for constant literals, eg OrderedDict
+#ifndef MICROPY_COMP_CONST_LITERAL
+#define MICROPY_COMP_CONST_LITERAL (1)
+#endif
+
 // Whether to enable lookup of constants in modules; eg module.CONST
 #ifndef MICROPY_COMP_MODULE_CONST
 #define MICROPY_COMP_MODULE_CONST (0)
@@ -407,6 +412,11 @@
 // Whether to enable all debugging outputs (it will be extremely verbose)
 #ifndef MICROPY_DEBUG_VERBOSE
 #define MICROPY_DEBUG_VERBOSE (0)
+#endif
+
+// Whether to enable debugging versions of MP_OBJ_NULL/STOP_ITERATION/SENTINEL
+#ifndef MICROPY_DEBUG_MP_OBJ_SENTINELS
+#define MICROPY_DEBUG_MP_OBJ_SENTINELS (0)
 #endif
 
 // Whether to enable a simple VM stack overflow check
