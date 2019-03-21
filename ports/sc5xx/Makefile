@@ -83,7 +83,7 @@ SRC_ADI = \
 SRC_LIB = $(addprefix lib/,\
 	libc/string0.c \
 	oofatfs/ff.c \
-	oofatfs/option/unicode.c \
+	oofatfs/ffunicode.c \
 	mp-readline/readline.c \
 	timeutils/timeutils.c \
 	utils/pyexec.c \
