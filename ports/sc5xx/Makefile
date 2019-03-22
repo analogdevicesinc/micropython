@@ -45,8 +45,11 @@ SRC_DRIVERS = $(addprefix drivers/,\
 	)
 
 SRC_C = \
+	adau1761_configurations.c \
 	apt-sc589.c \
+	bm_adau_device.c \
 	bm_spi.c \
+	bm_sru.c \
 	bm_twi.c \
 	bm_uart.c \
 	fatfs_port.c \
@@ -59,6 +62,7 @@ SRC_C = \
 	systick.c \
 
 SRC_C += $(addprefix modules/,\
+	board/modboard.c \
 	machine/extint.c \
 	machine/i2c.c \
 	machine/machine_i2c.c \

@@ -121,7 +121,7 @@
 #define MICROPY_PY_MACHINE_SPI      (1)
 #define MICROPY_PY_MACHINE_SPI_MAKE_NEW machine_hard_spi_make_new
 #define MICROPY_PY_MACHINE_I2C      (1)
-#define MICROPY_HW_ENABLE_HW_I2C (1)
+#define MICROPY_HW_ENABLE_HW_I2C    (1)
 #define MICROPY_PY_MACHINE_I2C_MAKE_NEW machine_hard_i2c_make_new
 #define MICROPY_HW_SOFTSPI_MIN_DELAY (0)
 #define MICROPY_HW_SOFTSPI_MAX_BAUDRATE (100000)
@@ -170,6 +170,7 @@ extern const struct _mp_obj_module_t machine_module;
 extern const struct _mp_obj_module_t mp_module_uos;
 extern const struct _mp_obj_module_t mp_module_utime;
 extern const struct _mp_obj_module_t mp_module_sharc;
+extern const struct _mp_obj_module_t mp_module_board;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
     { MP_ROM_QSTR(MP_QSTR_umachine), MP_ROM_PTR(&machine_module) }, \
@@ -191,6 +192,7 @@ extern const struct _mp_obj_module_t mp_module_sharc;
     { MP_ROM_QSTR(MP_QSTR_struct), MP_ROM_PTR(&mp_module_ustruct) }, \
     { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&machine_module) }, \
     { MP_ROM_QSTR(MP_QSTR_sharc), MP_ROM_PTR(&mp_module_sharc) }, \
+    { MP_ROM_QSTR(MP_QSTR_board), MP_ROM_PTR(&mp_module_board) }, \
 
 // extra constants
 #define MICROPY_PORT_CONSTANTS \

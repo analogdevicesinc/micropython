@@ -56,6 +56,7 @@
 #include "spi.h"
 #include "i2c.h"
 #include "sdcard.h"
+#include "modboard.h"
 
 BM_UART uart0;
 
@@ -89,6 +90,7 @@ int main(int argc, char **argv) {
     spi_init0();
     i2c_init0();
     sdcard_init();
+    board_init();
 
     #if MICROPY_HW_SDCARD_MOUNT_AT_BOOT
     // if an SD card is present then mount it on /sd/
