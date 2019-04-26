@@ -37,6 +37,7 @@ volatile uint64_t system_milliticks = 0;
 ADI_TMR_HANDLE timer_handle;
 uint8_t timer_instance_memory[ADI_TMR_MEMORY];
 uint32_t us_divider;
+void (*sys_tick_callback)(uint32_t ticks) = NULL;
 
 static void systemtimer_handler(void *pCBParam,
                                 uint32_t Event,
@@ -45,6 +46,11 @@ static void systemtimer_handler(void *pCBParam,
     {
         case ADI_TMR_EVENT_DATA_INT:
             system_milliticks++;
+
+            // If a user callback has been set for the 1ms tick event, call it
+            if (sys_tick_callback != NULL) {
+                sys_tick_callback(system_milliticks);
+            }
             break;
 
         default:
@@ -97,6 +103,14 @@ void sys_tick_init() {
 
     // This is used to calculate the us tick
     us_divider = fsclk0 / 1000000;
+}
+
+void sys_tick_set_callback(void (*tick_callback)(uint32_t ticks)) {
+
+    // If a callback has been provided to be called when a 1ms tick event occurs, set it here
+    if (tick_callback != NULL) {
+        sys_tick_callback = tick_callback;
+    }
 }
 
 // Core delay function that does an efficient sleep and may switch thread context.
