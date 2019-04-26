@@ -93,13 +93,18 @@
 #endif
 
 // Whether to enable the SD card interface, exposed as pyb.SDCard
-#ifndef MICROPY_HW_HAS_SDCARD
-#define MICROPY_HW_HAS_SDCARD (0)
+#ifndef MICROPY_HW_ENABLE_SDCARD
+#define MICROPY_HW_ENABLE_SDCARD (0)
+#endif
+
+// Whether to enable the MMC interface, exposed as pyb.MMCard
+#ifndef MICROPY_HW_ENABLE_MMCARD
+#define MICROPY_HW_ENABLE_MMCARD (0)
 #endif
 
 // Whether to automatically mount (and boot from) the SD card if it's present
 #ifndef MICROPY_HW_SDCARD_MOUNT_AT_BOOT
-#define MICROPY_HW_SDCARD_MOUNT_AT_BOOT (MICROPY_HW_HAS_SDCARD)
+#define MICROPY_HW_SDCARD_MOUNT_AT_BOOT (MICROPY_HW_ENABLE_SDCARD)
 #endif
 
 // Whether to enable the MMA7660 driver, exposed as pyb.Accel
@@ -203,6 +208,12 @@
 #else
 #define MICROPY_HW_RCC_HSE_STATE (RCC_HSE_ON)
 #endif
+#endif
+
+// If disabled then try normal (non-bypass) LSE first, with fallback to LSI.
+// If enabled first try LSE in bypass mode.  If that fails to start, try non-bypass mode, with fallback to LSI.
+#ifndef MICROPY_HW_RTC_USE_BYPASS
+#define MICROPY_HW_RTC_USE_BYPASS (0)
 #endif
 
 #if MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE

@@ -539,7 +539,7 @@ void stm32_main(uint32_t reset_mode) {
     #if MICROPY_PY_PYB_LEGACY && MICROPY_HW_ENABLE_HW_I2C
     i2c_init0();
     #endif
-    #if MICROPY_HW_HAS_SDCARD
+    #if MICROPY_HW_ENABLE_SDCARD
     sdcard_init();
     #endif
     #if MICROPY_HW_ENABLE_STORAGE
@@ -630,6 +630,10 @@ soft_reset:
 
     #if MICROPY_HW_ENABLE_USB
     pyb_usb_init0();
+
+    // Activate USB_VCP(0) on dupterm slot 1 for the REPL
+    MP_STATE_VM(dupterm_objs[1]) = MP_OBJ_FROM_PTR(&pyb_usb_vcp_obj);
+    usb_vcp_attach_to_repl(&pyb_usb_vcp_obj, true);
     #endif
 
     // Initialise the local flash filesystem.
@@ -674,15 +678,12 @@ soft_reset:
     // TODO perhaps have pyb.reboot([bootpy]) function to soft-reboot and execute custom boot.py
     if (reset_mode == 1 || reset_mode == 3) {
         const char *boot_py = "boot.py";
-        mp_import_stat_t stat = mp_import_stat(boot_py);
-        if (stat == MP_IMPORT_STAT_FILE) {
-            int ret = pyexec_file(boot_py);
-            if (ret & PYEXEC_FORCED_EXIT) {
-                goto soft_reset_exit;
-            }
-            if (!ret) {
-                flash_error(4);
-            }
+        int ret = pyexec_file_if_exists(boot_py);
+        if (ret & PYEXEC_FORCED_EXIT) {
+            goto soft_reset_exit;
+        }
+        if (!ret) {
+            flash_error(4);
         }
     }
 
@@ -717,10 +718,6 @@ soft_reset:
     servo_init();
     #endif
 
-    #if MICROPY_HW_ENABLE_DAC
-    dac_init();
-    #endif
-
     #if MICROPY_PY_NETWORK
     mod_network_init();
     #endif
@@ -735,15 +732,12 @@ soft_reset:
         } else {
             main_py = mp_obj_str_get_str(MP_STATE_PORT(pyb_config_main));
         }
-        mp_import_stat_t stat = mp_import_stat(main_py);
-        if (stat == MP_IMPORT_STAT_FILE) {
-            int ret = pyexec_file(main_py);
-            if (ret & PYEXEC_FORCED_EXIT) {
-                goto soft_reset_exit;
-            }
-            if (!ret) {
-                flash_error(3);
-            }
+        int ret = pyexec_file_if_exists(main_py);
+        if (ret & PYEXEC_FORCED_EXIT) {
+            goto soft_reset_exit;
+        }
+        if (!ret) {
+            flash_error(3);
         }
     }
 
