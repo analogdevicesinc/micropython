@@ -157,6 +157,7 @@ uint extint_reg_pin(const pin_obj_t *pin, uint32_t mode, uint32_t pull, mp_obj_t
 
     if (mode != GPIO_MODE_IT_RISING &&
         mode != GPIO_MODE_IT_FALLING &&
+        mode != GPIO_MODE_IT_HIGH_LEVEL &&
         mode != GPIO_MODE_IT_LOW_LEVEL) {
         nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "invalid ExtInt Mode: %d", mode));
     }
@@ -278,9 +279,10 @@ uint extint_reg_pin(const pin_obj_t *pin, uint32_t mode, uint32_t pull, mp_obj_t
             else if (mode == GPIO_MODE_IT_FALLING) *pREG_PINT_INV_SET = pinmask;
         }
         // Set up level triggered interrupts for this port
-        else if (mode == GPIO_MODE_IT_LOW_LEVEL) {
+        else if (mode == GPIO_MODE_IT_HIGH_LEVEL || mode == GPIO_MODE_IT_LOW_LEVEL) {
             *pREG_PINT_EDGE_CLR = pinmask;     // Clear edge interrupt
-            *pREG_PINT_INV_SET = pinmask;      // Invert pin for active low
+            if      (mode == GPIO_MODE_IT_HIGH_LEVEL) *pREG_PINT_INV_CLR = pinmask;
+            else if (mode == GPIO_MODE_IT_LOW_LEVEL) *pREG_PINT_INV_SET = pinmask;
         }
 
         // Assign PINT to this port

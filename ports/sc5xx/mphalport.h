@@ -67,9 +67,10 @@ typedef struct {
 #define GPIO_MODE_OUTPUT_PP ((uint32_t)0x00000001)
 #define GPIO_MODE_AF_PP     ((uint32_t)0x00000002)
 #define GPIO_MODE_INVALID   ((uint32_t)0xFFFFFFFF)
-#define GPIO_MODE_IT_RISING    ((uint32_t)0)
-#define GPIO_MODE_IT_FALLING   ((uint32_t)1)
-#define GPIO_MODE_IT_LOW_LEVEL ((uint32_t)2)
+#define GPIO_MODE_IT_RISING     ((uint32_t)0)
+#define GPIO_MODE_IT_FALLING    ((uint32_t)1)
+#define GPIO_MODE_IT_HIGH_LEVEL ((uint32_t)2)
+#define GPIO_MODE_IT_LOW_LEVEL  ((uint32_t)3)
 
 #define IS_GPIO_MODE(MODE) (((MODE) == GPIO_MODE_INPUT)              ||\
                             ((MODE) == GPIO_MODE_OUTPUT_PP)          ||\
