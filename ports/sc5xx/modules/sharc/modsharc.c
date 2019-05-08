@@ -101,9 +101,30 @@ STATIC mp_obj_t sharc_boot(mp_obj_t buf) {
 }
 MP_DEFINE_CONST_FUN_OBJ_1(mod_sharc_boot_obj, sharc_boot);
 
+/// \function enable()
+/// Enable the selected SHARC core
+STATIC mp_obj_t sharc_enable(mp_obj_t id) {
+    if (!mp_obj_is_small_int(id)) {
+        mp_raise_TypeError("Core ID need to be an integer!");
+    }
+
+    int core_id = MP_OBJ_SMALL_INT_VALUE(id);
+
+    if (core_id == 0)
+        adi_core_enable(ADI_CORE_SHARC0);
+    else if (core_id == 1)
+        adi_core_enable(ADI_CORE_SHARC1);
+    else
+        mp_raise_ValueError("Valid core number: 0, 1.");
+
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_1(mod_sharc_enable_obj, sharc_enable);
+
 STATIC const mp_rom_map_elem_t sharc_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_sharc) },
     { MP_ROM_QSTR(MP_QSTR_boot), MP_ROM_PTR(&mod_sharc_boot_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&mod_sharc_enable_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(sharc_module_globals, sharc_module_globals_table);
