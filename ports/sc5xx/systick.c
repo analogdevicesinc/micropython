@@ -106,11 +106,18 @@ void sys_tick_init() {
 }
 
 void sys_tick_set_callback(void (*tick_callback)(uint32_t ticks)) {
-
     // If a callback has been provided to be called when a 1ms tick event occurs, set it here
     if (tick_callback != NULL) {
         sys_tick_callback = tick_callback;
     }
+}
+
+void sys_tick_disable_irq(void) {
+    adi_tmr_EnableDataInt(timer_handle, false);
+}
+
+void sys_tick_enable_irq(void) {
+    adi_tmr_EnableDataInt(timer_handle, true);
 }
 
 // Core delay function that does an efficient sleep and may switch thread context.
