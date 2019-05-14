@@ -55,6 +55,7 @@
 #include "pin.h"
 #include "sdcard.h"
 #include "spi.h"
+#include "bm_uart.h"
 
 #define SC_RESET_SOFT      (0)
 #define SC_RESET_SYSSRC    (1)
@@ -276,6 +277,14 @@ STATIC mp_obj_t machine_reset_cause(void) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_cause_obj, machine_reset_cause);
 
+// defined in main
+extern BM_UART uart0;
+
+STATIC mp_obj_t machine_rx_available(void) {
+    return MP_OBJ_NEW_SMALL_INT(uart_available(&uart0));
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_rx_available_obj, machine_rx_available);
+
 STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__),            MP_ROM_QSTR(MP_QSTR_umachine) },
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
@@ -283,6 +292,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_reset),               MP_ROM_PTR(&machine_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_soft_reset),          MP_ROM_PTR(&machine_soft_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
+    { MP_ROM_QSTR(MP_QSTR_rx_available),        MP_ROM_PTR(&machine_rx_available_obj)},
 
     { MP_ROM_QSTR(MP_QSTR_Pin),                 MP_ROM_PTR(&pin_type) },
     { MP_ROM_QSTR(MP_QSTR_Signal),              MP_ROM_PTR(&machine_signal_type) },
