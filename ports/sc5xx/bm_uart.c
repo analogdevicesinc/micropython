@@ -248,7 +248,7 @@ BM_UART_RESULT uart_write_byte(BM_UART *device,
 
     // if the TX register is empty, move an transmit byte in there from our buffer
     // (otherwise this will get sent when byte being the currently transmitted is done)
-    if ((*device->pREG_UART_STAT & BITM_UART_STAT_TEMT) != 0) {
+    if ((*device->pREG_UART_STAT & BITM_UART_STAT_THRE) != 0) {
 
         // Transmit to UART,
         uart_write_tx_value(device, device->tx_buffer[device->tx_buffer_readptr++]);
@@ -278,8 +278,11 @@ BM_UART_RESULT uart_write_block(BM_UART *device,
     for (i = 0; i < len; i++) {
 
         // Copy bytes to UART transmit FIFO
-        BM_UART_RESULT res;
-        res = uart_write_byte(device, tx_bytes[i]);
+        // When FIFO is full, just retry
+        BM_UART_RESULT res = UART_TX_FIFO_FULL;
+        while (res == UART_TX_FIFO_FULL) {
+            res = uart_write_byte(device, tx_bytes[i]);
+        }
 
         if (res != UART_SUCCESS) {
             return res;
