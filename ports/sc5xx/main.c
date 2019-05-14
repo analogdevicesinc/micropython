@@ -73,6 +73,8 @@ int main(int argc, char **argv) {
     adi_initComponents();
 
     uart_initialize(&uart0, UART_BAUD_RATE_115200, UART_SERIAL_8N1, UART0);
+    uart_write_byte(&uart0, 0x1B); // Escape sequence
+    uart_write_byte(&uart0, 'c');  // Reset terminal
     uart_write_byte(&uart0, 0x0C); // Clear the screen
 
     adi_rtc_Init();
