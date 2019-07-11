@@ -69,6 +69,7 @@
 #define MICROPY_SCHEDULER_DEPTH     (8)
 #define MICROPY_VFS                 (1)
 #define MICROPY_VFS_FAT             (1)
+#define MICROPY_USE_INTERNAL_PRINTF (0)
 
 // control over Python builtins
 #define MICROPY_PY_FUNCTION_ATTRS   (1)
@@ -125,6 +126,8 @@
 #define MICROPY_PY_MACHINE_I2C_MAKE_NEW machine_hard_i2c_make_new
 #define MICROPY_HW_SOFTSPI_MIN_DELAY (0)
 #define MICROPY_HW_SOFTSPI_MAX_BAUDRATE (100000)
+#define MICROPY_PY_NETWORK          (1)
+#define MICROPY_PY_USOCKET          (1)
 
 // board specific definition
 #include <mpconfigboard.h>
@@ -171,11 +174,35 @@ extern const struct _mp_obj_module_t mp_module_uos;
 extern const struct _mp_obj_module_t mp_module_utime;
 extern const struct _mp_obj_module_t mp_module_sharc;
 extern const struct _mp_obj_module_t mp_module_board;
+extern const struct _mp_obj_module_t mp_module_usocket;
+extern const struct _mp_obj_module_t mp_module_network;
+
+#if MICROPY_PY_USOCKET && MICROPY_PY_LWIP
+// usocket implementation provided by lwIP
+#define SOCKET_BUILTIN_MODULE               { MP_ROM_QSTR(MP_QSTR_usocket), MP_ROM_PTR(&mp_module_lwip) },
+#define SOCKET_BUILTIN_MODULE_WEAK_LINKS    { MP_ROM_QSTR(MP_QSTR_socket), MP_ROM_PTR(&mp_module_lwip) },
+#elif MICROPY_PY_USOCKET
+// usocket implementation provided by skeleton wrapper
+#define SOCKET_BUILTIN_MODULE               { MP_ROM_QSTR(MP_QSTR_usocket), MP_ROM_PTR(&mp_module_usocket) },
+#define SOCKET_BUILTIN_MODULE_WEAK_LINKS    { MP_ROM_QSTR(MP_QSTR_socket), MP_ROM_PTR(&mp_module_usocket) },
+#else
+// no usocket module
+#define SOCKET_BUILTIN_MODULE
+#define SOCKET_BUILTIN_MODULE_WEAK_LINKS
+#endif
+
+#if MICROPY_PY_NETWORK
+#define NETWORK_BUILTIN_MODULE              { MP_ROM_QSTR(MP_QSTR_network), MP_ROM_PTR(&mp_module_network) },
+#else
+#define NETWORK_BUILTIN_MODULE
+#endif
 
 #define MICROPY_PORT_BUILTIN_MODULES \
     { MP_ROM_QSTR(MP_QSTR_umachine), MP_ROM_PTR(&machine_module) }, \
     { MP_ROM_QSTR(MP_QSTR_uos), MP_ROM_PTR(&mp_module_uos) }, \
     { MP_ROM_QSTR(MP_QSTR_utime), MP_ROM_PTR(&mp_module_utime) }, \
+    SOCKET_BUILTIN_MODULE \
+    NETWORK_BUILTIN_MODULE \
     { MP_ROM_QSTR(MP_QSTR_sharc), MP_ROM_PTR(&mp_module_sharc) }, \
 
 #define MICROPY_PORT_BUILTIN_MODULE_WEAK_LINKS \
@@ -189,6 +216,7 @@ extern const struct _mp_obj_module_t mp_module_board;
     { MP_ROM_QSTR(MP_QSTR_io), MP_ROM_PTR(&mp_module_io) }, \
     { MP_ROM_QSTR(MP_QSTR_os), MP_ROM_PTR(&mp_module_uos) }, \
     { MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&mp_module_utime) }, \
+    SOCKET_BUILTIN_MODULE_WEAK_LINKS \
     { MP_ROM_QSTR(MP_QSTR_struct), MP_ROM_PTR(&mp_module_ustruct) }, \
     { MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&machine_module) }, \
     { MP_ROM_QSTR(MP_QSTR_sharc), MP_ROM_PTR(&mp_module_sharc) }, \
@@ -215,6 +243,9 @@ extern const struct _mp_obj_module_t mp_module_board;
     \
     /* stdio is repeated on this UART object if it's not null */ \
     struct _sc_uart_obj_t *sc_stdio_uart; \
+    \
+    /* list of registered NICs */ \
+    mp_obj_list_t mod_network_nic_list; \
 
 #define MP_PLAT_PRINT_STRN(str, len) mp_hal_stdout_tx_strn_cooked(str, len)
 

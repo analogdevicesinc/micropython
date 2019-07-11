@@ -70,13 +70,13 @@ static struct
 
 /* local function declarations */
 static uint32_t sd_mmc_send_command( uint16_t command,
-        							 uint32_t argument,
-        							 ADI_RSI_RESPONSE_TYPE resp,
-        							 ADI_RSI_TRANSFER transfer,
-        							 uint32_t flags);		/* sends a command to over the RSI */
-static SD_MMC_CARD_TYPE sd_mmc_identification_sdv2(uint32_t);	/* performs SD Version 2.0 or later card detection */
-static SD_MMC_CARD_TYPE sd_mmc_identification_sdv1(void);		/* performs SD Version 1.x or earlier card detection */
-static SD_MMC_CARD_TYPE sd_mmc_identification_mmc(void);		/* performs MMC/eMMC detection */
+                                     uint32_t argument,
+                                     ADI_RSI_RESPONSE_TYPE resp,
+                                     ADI_RSI_TRANSFER transfer,
+                                     uint32_t flags);           /* sends a command to over the RSI */
+static SD_MMC_CARD_TYPE sd_mmc_identification_sdv2(uint32_t);   /* performs SD Version 2.0 or later card detection */
+static SD_MMC_CARD_TYPE sd_mmc_identification_sdv1(void);       /* performs SD Version 1.x or earlier card detection */
+static SD_MMC_CARD_TYPE sd_mmc_identification_mmc(void);        /* performs MMC/eMMC detection */
 void RSI_SetOptimumIdentificationSpeed(void);
 void RSI_GetClocks(void);
 
@@ -89,7 +89,7 @@ static uint32_t sd_mmc_read_csd_extended(void);
 static uint32_t sd_mmc_get_mmc_cid(void);
 static uint32_t card_address(uint32_t block_num)
 {    
-	return (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) ? block_num : block_num * 512;
+    return (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) ? block_num : block_num * 512;
 }
 
 /*
@@ -114,17 +114,17 @@ static uint32_t card_address(uint32_t block_num)
  */
 void RSI_WaitForCard(void)
 {
-	if ( ADI_RSI_SUCCESS != adi_rsi_IsCardPresent(hDevice))
-	{
-		/* wait for a device to be detected */
-		DEBUG_STATEMENT ( "Waiting for card to be detected...\n" );
+    if ( ADI_RSI_SUCCESS != adi_rsi_IsCardPresent(hDevice))
+    {
+        /* wait for a device to be detected */
+        DEBUG_STATEMENT ( "Waiting for card to be detected...\n" );
 
-		while ( ADI_RSI_SUCCESS != adi_rsi_IsCardPresent(hDevice));
-	}
+        while ( ADI_RSI_SUCCESS != adi_rsi_IsCardPresent(hDevice));
+    }
 
-	DEBUG_STATEMENT ( "Card Detected\n" );
+    DEBUG_STATEMENT ( "Card Detected\n" );
 
-	RSI_SetOptimumIdentificationSpeed();
+    RSI_SetOptimumIdentificationSpeed();
 }
 
 /*
@@ -137,18 +137,18 @@ void RSI_WaitForCard(void)
  */
 void RSI_WaitForCardRemoved(void)
 {
-	if ( ADI_RSI_SUCCESS == adi_rsi_IsCardPresent(hDevice))
-	{
-		/* wait for the card to be removed  */
-		DEBUG_STATEMENT ( "Waiting for card to be removed...\n" );
+    if ( ADI_RSI_SUCCESS == adi_rsi_IsCardPresent(hDevice))
+    {
+        /* wait for the card to be removed  */
+        DEBUG_STATEMENT ( "Waiting for card to be removed...\n" );
 
-		while ( ADI_RSI_SUCCESS == adi_rsi_IsCardPresent(hDevice))
-		{
-		    __asm("nop");
-		}
-	}
+        while ( ADI_RSI_SUCCESS == adi_rsi_IsCardPresent(hDevice))
+        {
+            __asm("nop");
+        }
+    }
 
-	DEBUG_STATEMENT ( "Card Removed\n" );
+    DEBUG_STATEMENT ( "Card Removed\n" );
 }
 
 
@@ -195,22 +195,22 @@ SD_MMC_SPEED_GRADE GetMMCHighTransferSpeed(void)
 
 static void SetOptimumCLKDIV(uint32_t sclk, uint32_t card_speed)
 {
-	uint32_t  clkdiv = 0;
-	uint32_t  rsi_freq = 0;
+    uint32_t  clkdiv = 0;
+    uint32_t  rsi_freq = 0;
 
     if(sclk <= card_speed)
     {
 //        DEBUG_PRINT("Setting RSI clock frequency to %luHz, by setting divisor to 1\n", sclk);
 
         if(ADI_RSI_SUCCESS != adi_rsi_SetClock(hDevice, 1u, ADI_RSI_CLK_MODE_ENABLE))
-        	DEBUG_PRINT("Error, unable to set RSI clock frequency to %luHz via bypass\n", sclk);
+            DEBUG_PRINT("Error, unable to set RSI clock frequency to %luHz via bypass\n", sclk);
     }
     else
     {
         do{
-        	/* We  have configured MSI module to run at 50MHz. */
-        	clkdiv++;
-        	rsi_freq = (sclk/(2*(clkdiv)));
+            /* We  have configured MSI module to run at 50MHz. */
+            clkdiv++;
+            rsi_freq = (sclk/(2*(clkdiv)));
         } while(rsi_freq > card_speed);
         clkdiv *= 2;
 
@@ -218,7 +218,7 @@ static void SetOptimumCLKDIV(uint32_t sclk, uint32_t card_speed)
 //        DEBUG_PRINT("Setting RSI clock frequency to %luHz\n", rsi_freq);
 
         if(ADI_RSI_SUCCESS != adi_rsi_SetClock(hDevice, clkdiv, ADI_RSI_CLK_MODE_ENABLE))
-        	DEBUG_PRINT("Error, unable to set RSI clock frequency to %luHz\n", clkdiv);
+            DEBUG_PRINT("Error, unable to set RSI clock frequency to %luHz\n", clkdiv);
 
         adi_rsi_card_registers.rsiclk = rsi_freq;
     }
@@ -274,8 +274,8 @@ uint32_t sd_mmc_read_block_dma(uint32_t card_address, void * pDestination)
 {
     uint32_t error = 0;     /* assume no error */
 
-	adi_rsi_SetBlockCntAndLen(hDevice, 1u, 512);
-	adi_rsi_SubmitRxBuffer(hDevice, pDestination, 512, 1);
+    adi_rsi_SetBlockCntAndLen(hDevice, 1u, 512);
+    adi_rsi_SubmitRxBuffer(hDevice, pDestination, 512, 1);
 
     error = sd_mmc_send_command(SD_MMC_CMD_READ_SINGLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_READ, CRCDIS); /* issue the block read command */
 
@@ -292,10 +292,10 @@ uint32_t sd_mmc_read_mblocks_dma(uint32_t card_address, void * pDestination, uin
 {
     uint32_t error = 0;
 
-	adi_rsi_SetBlockCntAndLen(hDevice, num_blocks, 512);
-	adi_rsi_SubmitRxBuffer(hDevice, pDestination, 512, num_blocks);
+    adi_rsi_SetBlockCntAndLen(hDevice, num_blocks, 512);
+    adi_rsi_SubmitRxBuffer(hDevice, pDestination, 512, num_blocks);
 
-	error = sd_mmc_send_command(SD_MMC_CMD_READ_MULTIPLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_READ, CRCDIS);
+    error = sd_mmc_send_command(SD_MMC_CMD_READ_MULTIPLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_READ, CRCDIS);
 
     void *pBuffer = NULL;
     adi_rsi_GetRxBuffer (hDevice, &pBuffer);
@@ -312,8 +312,8 @@ uint32_t sd_mmc_write_block_dma(uint32_t card_address, void * pSource)
 {
     uint32_t error = 0;
 
-	adi_rsi_SetBlockCntAndLen(hDevice, 1u, 512);
-	adi_rsi_SubmitTxBuffer(hDevice, pSource, 512, 1);
+    adi_rsi_SetBlockCntAndLen(hDevice, 1u, 512);
+    adi_rsi_SubmitTxBuffer(hDevice, pSource, 512, 1);
 
     error = sd_mmc_send_command(SD_MMC_CMD_WRITE_SINGLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_WRITE, CRCDIS);
 
@@ -334,16 +334,16 @@ uint32_t sd_mmc_write_mblocks_dma(uint32_t card_address, void * pSource, uint32_
     uint32_t error = 0;
     uint32_t i = 0;
 
-	adi_rsi_SetBlockCntAndLen(hDevice, num_blocks, 512);
-	adi_rsi_SubmitTxBuffer(hDevice, pSource, 512, num_blocks);
+    adi_rsi_SetBlockCntAndLen(hDevice, num_blocks, 512);
+    adi_rsi_SubmitTxBuffer(hDevice, pSource, 512, num_blocks);
 
-	error = sd_mmc_send_command(SD_MMC_CMD_WRITE_MULTIPLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_WRITE, CRCDIS);
+    error = sd_mmc_send_command(SD_MMC_CMD_WRITE_MULTIPLE_BLOCK, card_address, RESPONSE_SHORT, TRANS_WRITE, CRCDIS);
 
     void *pBuffer = NULL;
     adi_rsi_GetTxBuffer (hDevice, &pBuffer);
 
     /* workaround for some MMC cards that are fussy with regards to the timing
-		of the STOP_TRANSMISSION signal */
+        of the STOP_TRANSMISSION signal */
     for(i=0; i<1024; i++);
 
     error = sd_mmc_send_command(SD_MMC_CMD_STOP_TRANSMISSION, 0, RESPONSE_SHORT, TRANS_NONE, CRCDIS);
@@ -358,20 +358,20 @@ uint32_t sd_mmc_write_mblocks_dma(uint32_t card_address, void * pSource, uint32_
  *  sd_mmc_send_command
  */
 static uint32_t sd_mmc_send_command( uint16_t command,
-		                             uint32_t argument,
-		                             ADI_RSI_RESPONSE_TYPE resp,
-		                             ADI_RSI_TRANSFER transfer,
-		                             uint32_t flags)
+                                     uint32_t argument,
+                                     ADI_RSI_RESPONSE_TYPE resp,
+                                     ADI_RSI_TRANSFER transfer,
+                                     uint32_t flags)
 {
-	ADI_RSI_RESULT result;
+    ADI_RSI_RESULT result;
 
-	result = adi_rsi_SetDataMode(hDevice, transfer, ADI_RSI_CEATA_MODE_NONE);
+    result = adi_rsi_SetDataMode(hDevice, transfer, ADI_RSI_CEATA_MODE_NONE);
 
-	result = adi_rsi_SendCommand(hDevice, command, argument, flags, resp);
+    result = adi_rsi_SendCommand(hDevice, command, argument, flags, resp);
 
-	while (ADI_RSI_NOT_FINISHED == (result = adi_rsi_CheckCommand(hDevice, resp)));
+    while (ADI_RSI_NOT_FINISHED == (result = adi_rsi_CheckCommand(hDevice, resp)));
 
-	return result;
+    return result;
 }
 
 /*
@@ -424,7 +424,7 @@ SD_MMC_CARD_TYPE sd_mmc_identification(void)
 
         if(!error)
         {
-        	adi_rsi_GetShortResponse(hDevice, &response);
+            adi_rsi_GetShortResponse(hDevice, &response);
             adi_rsi_card_registers.sd.rca = (response & 0xFFFF0000)>>16;
 //            DEBUG_PRINT("RCA of 0x%04X sent from card\n", adi_rsi_card_registers.sd.rca);
 
@@ -584,17 +584,17 @@ SD_MMC_CARD_TYPE sd_mmc_identification_sdv1(void)
 
        if(error)
        {
-    	    /* not an SD card */
-    	    DEBUG_STATEMENT("Card not responding or invalid operating condition, setting card type to UNUSABLE_CARD\n");
-    	    type = UNUSABLE_CARD;
-    	    break;
+            /* not an SD card */
+            DEBUG_STATEMENT("Card not responding or invalid operating condition, setting card type to UNUSABLE_CARD\n");
+            type = UNUSABLE_CARD;
+            break;
        }
        else
        {
-    	   adi_rsi_GetShortResponse(hDevice, &response);
+           adi_rsi_GetShortResponse(hDevice, &response);
 
-    	   DEBUG_STATEMENT("OCR register received\n");
-    	   adi_rsi_card_registers.sd.ocr = response;
+           DEBUG_STATEMENT("OCR register received\n");
+           adi_rsi_card_registers.sd.ocr = response;
        }
 
     }while(!(adi_rsi_card_registers.sd.ocr & (unsigned int)SD_OCR_CARD_POWER_UP_STATUS));
@@ -630,17 +630,17 @@ SD_MMC_CARD_TYPE sd_mmc_identification_mmc()
                                     SD_MMC_SECTOR_MODE_SUPPORT | SD_MMC_VDD_OPERATING_RANGE, RESPONSE_SHORT, TRANS_NONE, CRCDIS);
         if(error)
         {
-     	    /* not an SD card */
-     	    DEBUG_STATEMENT("Card not responding or invalid operating condition, setting card type to UNUSABLE_CARD\n");
-     	    type = UNUSABLE_CARD;
-     	    break;
+             /* not an SD card */
+             DEBUG_STATEMENT("Card not responding or invalid operating condition, setting card type to UNUSABLE_CARD\n");
+             type = UNUSABLE_CARD;
+             break;
         }
         else
         {
-     	   adi_rsi_GetShortResponse(hDevice, &response);
+            adi_rsi_GetShortResponse(hDevice, &response);
 
-     	   DEBUG_STATEMENT("OCR register received\n");
-     	   adi_rsi_card_registers.sd.ocr = response;
+            DEBUG_STATEMENT("OCR register received\n");
+            adi_rsi_card_registers.sd.ocr = response;
         }
     }while(!(response & 0x80000000));
 
@@ -690,7 +690,7 @@ static uint32_t sd_mmc_get_mmc_cid(void)
 
     if(!error)
     {
-    	adi_rsi_GetLongResponse(hDevice, response);
+        adi_rsi_GetLongResponse(hDevice, response);
 
         adi_rsi_card_registers.mmc.cid.mid = ADI_MMC_CID_MID(response[0]);
         adi_rsi_card_registers.mmc.cid.cbx = ADI_MMC_CID_CBX(response[0]);
@@ -938,19 +938,19 @@ uint32_t sd_mmc_set_bus_width(unsigned short width)
     uint32_t clock_control_reg = 0;
 
     if((adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_MMC)
-	   || (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_MMC_CARD_HIGH_CAPACITY))
+       || (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_MMC_CARD_HIGH_CAPACITY))
     {
         switch(width){
                 case 1:
-                	    argument = 0x03B70000;
+                        argument = 0x03B70000;
                         clock_control_reg |= 0x0000;
                     break;
                 case 4:
-                	    argument = 0x03B70100;
+                        argument = 0x03B70100;
                         clock_control_reg |= 0x0800;
                     break;
                 case 8:
-                	    argument = 0x03B70200;
+                        argument = 0x03B70200;
                         clock_control_reg |= 0x1000;
                     break;
                 default:
@@ -987,7 +987,7 @@ uint32_t sd_mmc_set_bus_width(unsigned short width)
             if(!error)
             {
                 if(ADI_RSI_SUCCESS != adi_rsi_SetBusWidth(hDevice, width))
-                	DEBUG_STATEMENT("Error cannot set bus width.\n");
+                    DEBUG_STATEMENT("Error cannot set bus width.\n");
             }
         }
         else if(width == 4)
@@ -998,7 +998,7 @@ uint32_t sd_mmc_set_bus_width(unsigned short width)
             {
 
                 if(ADI_RSI_SUCCESS != adi_rsi_SetBusWidth(hDevice, width))
-                	DEBUG_STATEMENT("Error cannot set bus width.\n");
+                    DEBUG_STATEMENT("Error cannot set bus width.\n");
 
             }
         }
@@ -1057,30 +1057,30 @@ static uint32_t sd_mmc_get_sd_scr_register(void)
     int i = 0;
 
     for(i = 0; i < 8; i++)
-    	buffer[i] = 0xff;
+        buffer[i] = 0xff;
 
-	adi_rsi_SetBlockCntAndLen(hDevice, 1u, 8u);
-	adi_rsi_SubmitRxBuffer(hDevice, buffer, 8, 1);
+    adi_rsi_SetBlockCntAndLen(hDevice, 1u, 8u);
+    adi_rsi_SubmitRxBuffer(hDevice, buffer, 8, 1);
 
-	error = sd_mmc_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca<<16, RESPONSE_SHORT, TRANS_NONE, CRCDIS);
+    error = sd_mmc_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca<<16, RESPONSE_SHORT, TRANS_NONE, CRCDIS);
 
-	adi_rsi_GetShortResponse(hDevice, &response);
+    adi_rsi_GetShortResponse(hDevice, &response);
 
-	if((response & SD_CSR_CURRENT_STATE) == SD_CSR_CURRENT_STATE_STANDBY)
-	{
-		error = sd_mmc_send_command(   SD_MMC_CMD_SELECT_DESELECT_CARD,
+    if((response & SD_CSR_CURRENT_STATE) == SD_CSR_CURRENT_STATE_STANDBY)
+    {
+        error = sd_mmc_send_command(   SD_MMC_CMD_SELECT_DESELECT_CARD,
                                            adi_rsi_card_registers.sd.rca<<16, RESPONSE_SHORT, TRANS_NONE, CRCDIS);
 
-	}
+    }
 
-	error = sd_mmc_send_command(    SD_MMC_CMD_APP_CMD,
+    error = sd_mmc_send_command(    SD_MMC_CMD_APP_CMD,
                                     adi_rsi_card_registers.sd.rca<<16, RESPONSE_SHORT, TRANS_NONE, 0);
 
-	error = sd_mmc_send_command(    SD_CMD_GET_CONFIG_REG,
+    error = sd_mmc_send_command(    SD_CMD_GET_CONFIG_REG,
                                     0, RESPONSE_SHORT, TRANS_READ, 0);
 
-	if(!error)
-	{
+    if(!error)
+    {
         void *pBuffer = NULL;
         adi_rsi_GetRxBuffer (hDevice, &pBuffer);
 
@@ -1100,10 +1100,10 @@ static uint32_t sd_mmc_get_sd_ssr_register(void)
     uint32_t response;
     ADI_CACHE_ALIGN static uint8_t buffer[ADI_CACHE_ROUND_UP_SIZE(64u, uint8_t)];
 
-	adi_rsi_SetBlockCntAndLen(hDevice, 1u, 64u);
-	adi_rsi_SubmitRxBuffer(hDevice, buffer, 64, 1);
+    adi_rsi_SetBlockCntAndLen(hDevice, 1u, 64u);
+    adi_rsi_SubmitRxBuffer(hDevice, buffer, 64, 1);
 
-	adi_rsi_GetShortResponse(hDevice, &response);
+    adi_rsi_GetShortResponse(hDevice, &response);
 
     if((response & SD_CSR_CURRENT_STATE) == SD_CSR_CURRENT_STATE_STANDBY)
     {
@@ -1122,16 +1122,16 @@ static uint32_t sd_mmc_get_sd_ssr_register(void)
                                         TRANS_NONE,
                                         CRCDIS);
 
-       	if(!error)
-       	{
-       		error = sd_mmc_send_command(    SD_CMD_GET_MEMORY_STATUS | BITM_MSI_CMD_DXPECT,
-       										0/*adi_rsi_card_registers.sd.rca<<16*/,
-       										RESPONSE_SHORT,
-       										TRANS_READ,
-       										CRCDIS);
+           if(!error)
+           {
+               error = sd_mmc_send_command(    SD_CMD_GET_MEMORY_STATUS | BITM_MSI_CMD_DXPECT,
+                                               0/*adi_rsi_card_registers.sd.rca<<16*/,
+                                               RESPONSE_SHORT,
+                                               TRANS_READ,
+                                               CRCDIS);
 
-           	if(!error)
-           	{
+               if(!error)
+               {
 
                 void *pBuffer;
                 adi_rsi_GetRxBuffer (hDevice, &pBuffer);
@@ -1161,7 +1161,7 @@ RSI_DATA_BUS_WIDTH mmc_bus_test()
      * RSI */
     if(ADI_RSI_MAX_BUS_WIDTH == RSI_DATA_BUS_WIDTH_8)
     {
-    	width = RSI_DATA_BUS_WIDTH_8;
+        width = RSI_DATA_BUS_WIDTH_8;
     }
 
     return width;
@@ -1169,28 +1169,28 @@ RSI_DATA_BUS_WIDTH mmc_bus_test()
 
 void RSI_GetClocks(void)
 {
-	uint32_t sclk = 0;
-	ADI_PWR_RESULT ePwrResult;
+    uint32_t sclk = 0;
+    ADI_PWR_RESULT ePwrResult;
 
-	/* We need to configure MSI module to run at 50MHz. The "adi_pwr_Get***Freq()" api
-	* will return the OCLK_1. The MSI module runs at OCLK_1/2.
-	* Hence, while calculating the "RSI_FREQ" using CLKDIV, we need to divide
-	* the clock value by 2 (received using "adi_pwr_Get***Freq()" api) to get OCLK_1/2.*/
+    /* We need to configure MSI module to run at 50MHz. The "adi_pwr_Get***Freq()" api
+    * will return the OCLK_1. The MSI module runs at OCLK_1/2.
+    * Hence, while calculating the "RSI_FREQ" using CLKDIV, we need to divide
+    * the clock value by 2 (received using "adi_pwr_Get***Freq()" api) to get OCLK_1/2.*/
 
-	/* Here, OCLK1_1/2(50MHz) is used as a clock source to MSI.*/
+    /* Here, OCLK1_1/2(50MHz) is used as a clock source to MSI.*/
     uint32_t oclk1;
     ePwrResult = adi_pwr_GetOutClkFreq(1, &oclk1); // Modified CCLK1 to OCLK1
     if (ePwrResult==ADI_PWR_SUCCESS)
     {
-    	sclk = oclk1/2;
+        sclk = oclk1/2;
     }
 
-	if (ePwrResult != ADI_PWR_SUCCESS)
-	{
-		DEBUG_PRINT("\Error, unable to get input frequency. Setting to %lu\n", sclk);
-	}
+    if (ePwrResult != ADI_PWR_SUCCESS)
+    {
+        DEBUG_PRINT("\Error, unable to get input frequency. Setting to %lu\n", sclk);
+    }
 
-	adi_rsi_card_registers.sclk = sclk;
+    adi_rsi_card_registers.sclk = sclk;
 }
 
 uint32_t RSI_ReadBlock(uint32_t block_num, void * pReadBuffer)

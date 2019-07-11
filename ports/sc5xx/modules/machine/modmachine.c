@@ -125,9 +125,49 @@ void machine_init(void) {
     result = adi_pwr_Init(DEV_NUM, CLKIN);
     check_result(result, "adi_pwr_Init");
 
-    /* Set CGU clock select register */
-    result = adi_pwr_SetClkOutSelectRegister(DEV_NUM, ADI_PWR_CLKOUT_CCLK);
-    check_result(result, "adi_pwr_SetClkOutSelectRegister");
+    // Set CGU clock select register
+    //result = adi_pwr_SetClkOutSelectRegister(DEV_NUM, ADI_PWR_CLKOUT_CCLK);
+    //check_result(result, "adi_pwr_SetClkOutSelectRegister");
+
+    // Initialize GEMAC clock
+#ifdef CLOCK_SPEED_500MHZ
+    result = adi_pwr_SetFreq(0, 500000000, 250000000);
+    check_result(result, "adi_pwr_SetFreq");
+
+    result = adi_pwr_SetClkDivideRegister(0, ADI_PWR_CLK_DIV_OSEL, 4);
+    check_result(result, "adi_pwr_SetClkDivideRegister");
+
+    // Use OCLK from CGU0 for GigE/RGMII
+    adi_pwr_ConfigCduInputClock(ADI_PWR_CDU_CLKIN_3, ADI_PWR_CDU_CLKOUT_7);
+    check_result(result, "adi_pwr_SetClkDivideRegister");
+
+    adi_pwr_EnableCduClockOutput(ADI_PWR_CDU_CLKOUT_7, true);
+    check_result(result, "adi_pwr_SetClkDivideRegister");
+#else
+    // Select CLKIN 0 as CGU 1 input clock
+    result = adi_pwr_SelectCduClockSource(ADI_PWR_CDU_CGU_SELECT_CGU1, ADI_PWR_CDU_CLK_SELECT_CLKIN0);
+    check_result(result, "adi_pwr_SelectCduClockSource");
+
+    result = adi_pwr_Init (1, 25000000);
+    check_result(result, "adi_pwr_Init");
+
+    result = adi_pwr_SetPowerMode(1, ADI_PWR_MODE_FULL_ON);
+    check_result(result, "adi_pwr_SetPowerMode");
+
+    // CCLK = 125 MHz, SYSCLK = 62.5 MHz
+    result = adi_pwr_SetFreq(1, 125000000, 62500000);
+    check_result(result, "adi_pwr_SetFreq");
+
+    result = adi_pwr_SetClkDivideRegister(1, ADI_PWR_CLK_DIV_OSEL, 1);
+    check_result(result, "adi_pwr_SetClkDivideRegister");
+
+    // Use CCLK from CGU1 for GigE/RGMII
+    result = adi_pwr_ConfigCduInputClock(ADI_PWR_CDU_CLKIN_2, ADI_PWR_CDU_CLKOUT_7);
+    check_result(result, "adi_pwr_ConfigCduInputClock");
+
+    result = adi_pwr_EnableCduClockOutput(ADI_PWR_CDU_CLKOUT_7, true);
+    check_result(result, "adi_pwr_EnableCduClockOutput");
+#endif
 
     result = adi_pwr_GetCoreFreq(DEV_NUM, &fcclk);
     check_result(result, "adi_pwr_GetCoreFreq");
@@ -290,6 +330,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_info),                MP_ROM_PTR(&machine_info_obj) },
     { MP_ROM_QSTR(MP_QSTR_unique_id),           MP_ROM_PTR(&machine_unique_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset),               MP_ROM_PTR(&machine_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reset_cause),         MP_ROM_PTR(&machine_reset_cause_obj) },
     { MP_ROM_QSTR(MP_QSTR_soft_reset),          MP_ROM_PTR(&machine_soft_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_freq),                MP_ROM_PTR(&machine_freq_obj) },
     { MP_ROM_QSTR(MP_QSTR_rx_available),        MP_ROM_PTR(&machine_rx_available_obj)},

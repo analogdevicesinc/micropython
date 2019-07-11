@@ -47,6 +47,10 @@
 #include "extmod/vfs.h"
 #include "extmod/vfs_fat.h"
 
+#if MICROPY_PY_LWIP
+#include "lwip/init.h"
+#endif
+
 #include <services/rtc/adi_rtc.h>
 #include "adi_initialize.h"
 #include "bm_uart.h"
@@ -57,12 +61,29 @@
 #include "i2c.h"
 #include "sdcard.h"
 #include "modboard.h"
+#include "modnetwork.h"
 
 BM_UART uart0;
 
-#define HEAP_SIZE 128*1024*1024
+#define HEAP_SIZE 8*1024*1024
 
 STATIC bool init_sdcard_fs(void);
+
+int _write(int file, char *data, int len)
+{
+   if ((file != STDOUT_FILENO) && (file != STDERR_FILENO))
+   {
+      errno = EBADF;
+      return -1;
+   }
+
+   // arbitrary timeout 1000
+   BM_UART_RESULT status =
+           uart_write_block(&uart0, (uint8_t*)data, len);
+
+   // return # of bytes written - as best we can tell
+   return (status == UART_SUCCESS ? len : 0);
+}
 
 int main(int argc, char **argv) {
 
@@ -72,6 +93,8 @@ int main(int argc, char **argv) {
 
     adi_initComponents();
 
+    machine_init(); // Initialize clocks
+
     uart_initialize(&uart0, UART_BAUD_RATE_115200, UART_SERIAL_8N1, UART0);
     uart_write_byte(&uart0, 0x1B); // Escape sequence
     uart_write_byte(&uart0, 'c');  // Reset terminal
@@ -79,13 +102,20 @@ int main(int argc, char **argv) {
 
     adi_rtc_Init();
 
-#if MICROPY_ENABLE_GC
+    #if MICROPY_ENABLE_GC
     char *heap = malloc(HEAP_SIZE);
     gc_init(heap, heap + HEAP_SIZE);
-#endif
+    #endif
+
+    #if MICROPY_PY_LWIP
+    // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
+    // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
+    // So for now we only init the lwIP stack once on power-up.
+    lwip_init();
+    sys_tick_set_callback(mod_network_lwip_poll_wrapper);
+    #endif
 
     mp_init();
-    machine_init();
     readline_init0();
     pin_init0();
     sys_tick_init();
@@ -99,6 +129,10 @@ int main(int argc, char **argv) {
     if (sdcard_is_present()) {
         init_sdcard_fs();
     }
+    #endif
+
+    #if MICROPY_PY_NETWORK
+    mod_network_init();
     #endif
 
     pyexec_friendly_repl();

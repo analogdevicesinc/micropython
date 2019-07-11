@@ -1,6 +1,6 @@
 /*
 **
-** mcapi_config.c source file generated on January 25, 2019 at 09:17:28.	
+** mcapi_config.c source file generated on July 11, 2019 at 13:55:56.	
 **
 ** Copyright (C) 2000-2019 Analog Devices Inc., All Rights Reserved.
 **
@@ -37,7 +37,7 @@
 #if defined (__GNUC__)
 #define ALIGNED_4_ATTRIBUTE ATTRIBUTE(aligned(4))
 #define ALIGNED_4_PRAGMA
-#define UNCACHED_DATA_ATTRIBUTE SECTION_ATTRIBUTE(.l2_uncached_data)
+#define UNCACHED_DATA_ATTRIBUTE SECTION_ATTRIBUTE(.mcapi_data_core0)
 #define UNCACHED_DATA_PRAGMA
 #else
 #define ALIGNED_4_ATTRIBUTE

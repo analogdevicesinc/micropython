@@ -63,3 +63,5 @@
 #define MICROPY_HW_SPI2_SCK     (pin_C1)    // SPI Flash
 #define MICROPY_HW_SPI2_MISO    (pin_C2)    // SPI Flash
 #define MICROPY_HW_SPI2_MOSI    (pin_C3)    // SPI Flash
+
+#define MICROPY_HW_EMAC             (0)
