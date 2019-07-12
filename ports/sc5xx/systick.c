@@ -33,11 +33,13 @@
 
 #define SYSTICK_TMR_ID 0
 
+#define MAX_REGISTERED_CALLBACKS 3
+
 volatile uint64_t system_milliticks = 0;
 ADI_TMR_HANDLE timer_handle;
 uint8_t timer_instance_memory[ADI_TMR_MEMORY];
 uint32_t us_divider;
-void (*sys_tick_callback)(uint32_t ticks) = NULL;
+CALLBACK_HANDLER systick_callbacks[MAX_REGISTERED_CALLBACKS];
 
 static void systemtimer_handler(void *pCBParam,
                                 uint32_t Event,
@@ -48,9 +50,12 @@ static void systemtimer_handler(void *pCBParam,
             system_milliticks++;
 
             // If a user callback has been set for the 1ms tick event, call it
-            if (sys_tick_callback != NULL) {
-                sys_tick_callback(system_milliticks);
+            for (int i = 0; i < MAX_REGISTERED_CALLBACKS; i++) {
+                if (systick_callbacks[i] != NULL) {
+                    systick_callbacks[i](system_milliticks);
+                }
             }
+
             break;
 
         default:
@@ -60,6 +65,10 @@ static void systemtimer_handler(void *pCBParam,
 
 void sys_tick_init() {
     uint32_t fsclk0 = machine_get_fsclk0();
+
+    for (int i = 0; i < MAX_REGISTERED_CALLBACKS; i++) {
+        systick_callbacks[i] = NULL;
+    }
 
     // Initialize 1ms timer
     if (adi_tmr_Open(SYSTICK_TMR_ID,
@@ -105,10 +114,12 @@ void sys_tick_init() {
     us_divider = fsclk0 / 1000000;
 }
 
-void sys_tick_set_callback(void (*tick_callback)(uint32_t ticks)) {
+void sys_tick_set_callback(CALLBACK_HANDLER callback) {
     // If a callback has been provided to be called when a 1ms tick event occurs, set it here
-    if (tick_callback != NULL) {
-        sys_tick_callback = tick_callback;
+    for (int i = 0; i < MAX_REGISTERED_CALLBACKS; i++) {
+        if (systick_callbacks[i] == NULL) {
+            systick_callbacks[i] = callback;
+        }
     }
 }
 
