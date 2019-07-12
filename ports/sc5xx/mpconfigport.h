@@ -69,7 +69,7 @@
 #define MICROPY_SCHEDULER_DEPTH     (8)
 #define MICROPY_VFS                 (1)
 #define MICROPY_VFS_FAT             (1)
-#define MICROPY_USE_INTERNAL_PRINTF (0)
+#define MICROPY_USE_INTERNAL_PRINTF (1)
 
 // control over Python builtins
 #define MICROPY_PY_FUNCTION_ATTRS   (1)
