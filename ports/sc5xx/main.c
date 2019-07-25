@@ -107,6 +107,11 @@ int main(int argc, char **argv) {
     gc_init(heap, heap + HEAP_SIZE);
     #endif
 
+    mp_init();
+    readline_init0();
+    pin_init0();
+    sys_tick_init();
+
     #if MICROPY_PY_LWIP
     // lwIP doesn't allow to reinitialise itself by subsequent calls to this function
     // because the system timeout list (next_timeout) is only ever reset by BSS clearing.
@@ -115,10 +120,6 @@ int main(int argc, char **argv) {
     sys_tick_set_callback(mod_network_lwip_poll_wrapper);
     #endif
 
-    mp_init();
-    readline_init0();
-    pin_init0();
-    sys_tick_init();
     spi_init0();
     i2c_init0();
     sdcard_init();

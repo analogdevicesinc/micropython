@@ -119,6 +119,7 @@ void sys_tick_set_callback(CALLBACK_HANDLER callback) {
     for (int i = 0; i < MAX_REGISTERED_CALLBACKS; i++) {
         if (systick_callbacks[i] == NULL) {
             systick_callbacks[i] = callback;
+            break;
         }
     }
 }
